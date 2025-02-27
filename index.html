@@ -362,6 +362,7 @@
     const interestLost1Span = document.getElementById('interestLost1');
     const interestLost5Span = document.getElementById('interestLost5');
     const chartCanvas = document.getElementById('savingsChart');
+    const learnMoreList = document.querySelector('.learn-more .report-list');
 
     const ctx = chartCanvas.getContext('2d');
     const savingsChart = new Chart(ctx, {
@@ -372,14 +373,14 @@
                 {
                     label: 'Contributions ($)',
                     data: [],
-                    backgroundColor: '#3498db', // Default color, will be overridden in updateChart
+                    backgroundColor: '#3498db',
                     borderWidth: 0,
                     borderRadius: 5
                 },
                 {
                     label: 'Interest ($)',
                     data: [],
-                    backgroundColor: '#2ecc71', // Default color, will be overridden in updateChart
+                    backgroundColor: '#2ecc71',
                     borderWidth: 0,
                     borderRadius: 5
                 }
@@ -409,6 +410,47 @@
             }
         }
     });
+
+    const allReports = [
+        "Accumulation Goals", "Purchasing Power of One Dollar", "Checking Your Credit Report", 
+        "Credit Cards", "Debt Repayment Strategies", "Managing Your Debt", "Repaying Student Debt", 
+        "Time and Growth of Money", "Up to Your Neck in Debt?", "Asset Allocation", 
+        "Basic Investment Tools", "Coping With Market Volatility", "Federal Taxation of Common Investments", 
+        "Key Investment Questions", "Pay Off the Mortgage or Invest?", "Stock Market Indexes and Averages", 
+        "The Perfect Investment", "The Rule of 72 and the Rule of 115", "Types of Investment Risk", 
+        "Dollar Cost Averaging"
+    ];
+
+    function selectReports(age, income) {
+        let selectedReports = [];
+
+        // Age-based selections
+        if (age <= 30) {
+            selectedReports.push("Time and Growth of Money", "Checking Your Credit Report", "Dollar Cost Averaging");
+            if (income < 40000) selectedReports.push("Repaying Student Debt");
+            else if (income > 100000) selectedReports.push("Basic Investment Tools");
+        } else if (age <= 50) {
+            selectedReports.push("Managing Your Debt", "Asset Allocation", "Pay Off the Mortgage or Invest?");
+            if (income < 40000) selectedReports.push("Debt Repayment Strategies");
+            else if (income > 100000) selectedReports.push("Key Investment Questions");
+        } else {
+            selectedReports.push("Coping With Market Volatility", "Federal Taxation of Common Investments");
+            if (income < 40000) selectedReports.push("Purchasing Power of One Dollar");
+            else selectedReports.push("Stock Market Indexes and Averages", "The Perfect Investment");
+        }
+
+        // Always include "Accumulation Goals" as a general topic
+        if (!selectedReports.includes("Accumulation Goals")) {
+            selectedReports.unshift("Accumulation Goals");
+        }
+
+        // Limit to 3 reports and remove duplicates
+        return [...new Set(selectedReports)].slice(0, 3);
+    }
+
+    function updateLearnMore(reports) {
+        learnMoreList.innerHTML = reports.map(report => `<p>${report}</p>`).join('');
+    }
 
     function calculateSavings(startAge, income, rate, endAge, savingsRate) {
         const years = endAge - startAge;
@@ -457,9 +499,8 @@
         const years = endAge - age;
         const labels = Array.from({ length: years + 1 }, (_, i) => age + i);
 
-        // Create color arrays for both datasets
-        const contribColors = Array(years).fill('#3498db').concat('#e74c3c'); // Last bar red
-        const interestColors = Array(years).fill('#2ecc71').concat('#e74c3c'); // Last bar red
+        const contribColors = Array(years).fill('#3498db').concat('#e74c3c');
+        const interestColors = Array(years).fill('#2ecc71').concat('#e74c3c');
 
         savingsChart.data.labels = labels;
         savingsChart.data.datasets[0].data = startNow.annualContributions.map(c => Math.round(c));
@@ -479,6 +520,10 @@
         resultMessage.textContent = `The interest lost by waiting to start saving 1 year is $${Math.round(interestLost1Year).toLocaleString()}.`;
         interestLost1Span.textContent = Math.round(interestLost1Year).toLocaleString();
         interestLost5Span.textContent = Math.round(interestLost5YearsTotal).toLocaleString();
+
+        // Update Learn More section
+        const relevantReports = selectReports(age, income);
+        updateLearnMore(relevantReports);
 
         window.currentResults = {
             age,
