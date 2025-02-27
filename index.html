@@ -363,6 +363,7 @@
     const interestLost5Span = document.getElementById('interestLost5');
     const chartCanvas = document.getElementById('savingsChart');
     const learnMoreList = document.querySelector('.learn-more .report-list');
+    const relatedTopicsList = document.querySelector('.related-topics .report-list');
 
     const ctx = chartCanvas.getContext('2d');
     const savingsChart = new Chart(ctx, {
@@ -411,7 +412,7 @@
         }
     });
 
-    const allReports = [
+    const learnMoreReports = [
         "Accumulation Goals", "Purchasing Power of One Dollar", "Checking Your Credit Report", 
         "Credit Cards", "Debt Repayment Strategies", "Managing Your Debt", "Repaying Student Debt", 
         "Time and Growth of Money", "Up to Your Neck in Debt?", "Asset Allocation", 
@@ -421,35 +422,39 @@
         "Dollar Cost Averaging"
     ];
 
-    function selectReports(age, income) {
-        let selectedReports = [];
+    const relatedTopicsReports = {
+        disability: [
+            "Individual Disability Income Insurance", "The Impact of Disability", 
+            "The Individual Need for Disability Insurance"
+        ],
+        retirement: [
+            "The Need for Retirement Planning", "How a Roth IRA Works", "IRAs Compared", 
+            "How a 401(k) Cash or Deferred Plan Works"
+        ],
+        estatePlanning: [
+            "Term Life Insurance", "The Need for Responsible Planning", "Types of Life Insurance Policies", 
+            "Advantages of a Will", "Avoiding Probate", "Basic Steps in the Estate Planning Process", 
+            "The Importance of Beneficiary Designations", "Types of Wills and Trusts", 
+            "The Need for Estate Planning"
+        ]
+    };
 
-        // Age-based selections
-        if (age <= 30) {
-            selectedReports.push("Time and Growth of Money", "Checking Your Credit Report", "Dollar Cost Averaging");
-            if (income < 40000) selectedReports.push("Repaying Student Debt");
-            else if (income > 100000) selectedReports.push("Basic Investment Tools");
-        } else if (age <= 50) {
-            selectedReports.push("Managing Your Debt", "Asset Allocation", "Pay Off the Mortgage or Invest?");
-            if (income < 40000) selectedReports.push("Debt Repayment Strategies");
-            else if (income > 100000) selectedReports.push("Key Investment Questions");
-        } else {
-            selectedReports.push("Coping With Market Volatility", "Federal Taxation of Common Investments");
-            if (income < 40000) selectedReports.push("Purchasing Power of One Dollar");
-            else selectedReports.push("Stock Market Indexes and Averages", "The Perfect Investment");
-        }
-
-        // Always include "Accumulation Goals" as a general topic
-        if (!selectedReports.includes("Accumulation Goals")) {
-            selectedReports.unshift("Accumulation Goals");
-        }
-
-        // Limit to 3 reports and remove duplicates
-        return [...new Set(selectedReports)].slice(0, 3);
+    function getRandomItems(array, count) {
+        const shuffled = array.slice().sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
     }
 
-    function updateLearnMore(reports) {
-        learnMoreList.innerHTML = reports.map(report => `<p>${report}</p>`).join('');
+    function updateLearnMore() {
+        const randomReports = getRandomItems(learnMoreReports, 3);
+        learnMoreList.innerHTML = randomReports.map(report => `<p>${report}</p>`).join('');
+    }
+
+    function updateRelatedTopics() {
+        const disabilityReport = getRandomItems(relatedTopicsReports.disability, 1)[0];
+        const retirementReport = getRandomItems(relatedTopicsReports.retirement, 1)[0];
+        const estatePlanningReport = getRandomItems(relatedTopicsReports.estatePlanning, 1)[0];
+        const selectedReports = [disabilityReport, retirementReport, estatePlanningReport];
+        relatedTopicsList.innerHTML = selectedReports.map(report => `<p>${report}</p>`).join('');
     }
 
     function calculateSavings(startAge, income, rate, endAge, savingsRate) {
@@ -521,9 +526,9 @@
         interestLost1Span.textContent = Math.round(interestLost1Year).toLocaleString();
         interestLost5Span.textContent = Math.round(interestLost5YearsTotal).toLocaleString();
 
-        // Update Learn More section
-        const relevantReports = selectReports(age, income);
-        updateLearnMore(relevantReports);
+        // Update Learn More and Related Topics
+        updateLearnMore();
+        updateRelatedTopics();
 
         window.currentResults = {
             age,
