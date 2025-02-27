@@ -353,190 +353,193 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
-    <script>
-        const ageInput = document.getElementById('age');
-        const incomeInput = document.getElementById('income');
-        const resultMessage = document.getElementById('resultMessage');
-        const delayImpact = document.getElementById('delayImpact');
-        const interestLost1Span = document.getElementById('interestLost1');
-        const interestLost5Span = document.getElementById('interestLost5');
-        const chartCanvas = document.getElementById('savingsChart');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+<script>
+    const ageInput = document.getElementById('age');
+    const incomeInput = document.getElementById('income');
+    const resultMessage = document.getElementById('resultMessage');
+    const delayImpact = document.getElementById('delayImpact');
+    const interestLost1Span = document.getElementById('interestLost1');
+    const interestLost5Span = document.getElementById('interestLost5');
+    const chartCanvas = document.getElementById('savingsChart');
 
-        const ctx = chartCanvas.getContext('2d');
-        const savingsChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: [],
-                datasets: [
-                    {
-                        label: 'Contributions ($)',
-                        data: [],
-                        backgroundColor: '#3498db',
-                        borderWidth: 0,
-                        borderRadius: 5
-                    },
-                    {
-                        label: 'Interest ($)',
-                        data: [],
-                        backgroundColor: '#2ecc71',
-                        borderWidth: 0,
-                        borderRadius: 5
-                    }
-                ]
-            },
-            options: {
-                scales: {
-                    x: { 
-                        stacked: true,
-                        grid: { display: false },
-                        title: { display: true, text: 'Age' }
-                    },
-                    y: { 
-                        stacked: true,
-                        beginAtZero: true,
-                        grid: { color: '#e0e0e0' },
-                        title: { display: true, text: 'Annual Amount ($)' },
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
+    const ctx = chartCanvas.getContext('2d');
+    const savingsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Contributions ($)',
+                    data: [],
+                    backgroundColor: '#3498db', // Default color, will be overridden in updateChart
+                    borderWidth: 0,
+                    borderRadius: 5
+                },
+                {
+                    label: 'Interest ($)',
+                    data: [],
+                    backgroundColor: '#2ecc71', // Default color, will be overridden in updateChart
+                    borderWidth: 0,
+                    borderRadius: 5
+                }
+            ]
+        },
+        options: {
+            scales: {
+                x: { 
+                    stacked: true,
+                    grid: { display: false },
+                    title: { display: true, text: 'Age' }
+                },
+                y: { 
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: '#e0e0e0' },
+                    title: { display: true, text: 'Annual Amount ($)' },
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
                         }
                     }
-                },
-                plugins: {
-                    legend: { display: true }
                 }
+            },
+            plugins: {
+                legend: { display: true }
             }
-        });
-
-        function calculateSavings(startAge, income, rate, endAge, savingsRate) {
-            const years = endAge - startAge;
-            const annualSavings = income * savingsRate;
-            let balance = 0;
-            const annualContributions = [];
-            const annualInterest = [];
-
-            for (let i = 0; i <= years; i++) {
-                const yearlyInterest = balance * rate;
-                balance += annualSavings + yearlyInterest;
-                annualContributions.push(annualSavings);
-                annualInterest.push(yearlyInterest);
-            }
-            const totalContributions = annualSavings * (years + 1);
-            const totalInterest = balance - totalContributions;
-            return { annualContributions, annualInterest, finalBalance: balance, totalInterest };
         }
+    });
 
-        function updateChart() {
-            const age = parseFloat(ageInput.value) || 18;
-            const income = parseFloat(incomeInput.value) || 0;
-            const rateOfReturn = 0.06;
-            const endAge = 67;
-            const savingsRate = 0.20;
+    function calculateSavings(startAge, income, rate, endAge, savingsRate) {
+        const years = endAge - startAge;
+        const annualSavings = income * savingsRate;
+        let balance = 0;
+        const annualContributions = [];
+        const annualInterest = [];
 
-            if (age >= endAge) {
-                resultMessage.textContent = "Age must be less than 67.";
-                delayImpact.style.display = "none";
-                savingsChart.data.labels = [];
-                savingsChart.data.datasets[0].data = [];
-                savingsChart.data.datasets[1].data = [];
-                savingsChart.update();
-                return;
-            } else {
-                delayImpact.style.display = "block";
-            }
+        for (let i = 0; i <= years; i++) {
+            const yearlyInterest = balance * rate;
+            balance += annualSavings + yearlyInterest;
+            annualContributions.push(annualSavings);
+            annualInterest.push(yearlyInterest);
+        }
+        const totalContributions = annualSavings * (years + 1);
+        const totalInterest = balance - totalContributions;
+        return { annualContributions, annualInterest, finalBalance: balance, totalInterest };
+    }
 
-            // Calculate savings for each starting age
-            const startNow = calculateSavings(age, income, rateOfReturn, endAge, savingsRate);
-            const startYear1 = calculateSavings(age + 1, income, rateOfReturn, endAge, savingsRate);
-            const startYear2 = calculateSavings(age + 2, income, rateOfReturn, endAge, savingsRate);
-            const startYear3 = calculateSavings(age + 3, income, rateOfReturn, endAge, savingsRate);
-            const startYear4 = calculateSavings(age + 4, income, rateOfReturn, endAge, savingsRate);
-            const startYear5 = calculateSavings(Math.min(age + 5, 66), income, rateOfReturn, endAge, savingsRate);
+    function updateChart() {
+        const age = parseFloat(ageInput.value) || 18;
+        const income = parseFloat(incomeInput.value) || 0;
+        const rateOfReturn = 0.06;
+        const endAge = 67;
+        const savingsRate = 0.20;
 
-            const years = endAge - age;
-            const labels = Array.from({ length: years + 1 }, (_, i) => age + i);
-
-            savingsChart.data.labels = labels;
-            savingsChart.data.datasets[0].data = startNow.annualContributions.map(c => Math.round(c));
-            savingsChart.data.datasets[1].data = startNow.annualInterest.map(i => Math.round(i));
+        if (age >= endAge) {
+            resultMessage.textContent = "Age must be less than 67.";
+            delayImpact.style.display = "none";
+            savingsChart.data.labels = [];
+            savingsChart.data.datasets[0].data = [];
+            savingsChart.data.datasets[1].data = [];
             savingsChart.update();
-
-            // Calculate interest lost for each year of delay
-            const interestLost1Year = startNow.totalInterest - startYear1.totalInterest;
-            const interestLost2Year = startYear1.totalInterest - startYear2.totalInterest;
-            const interestLost3Year = startYear2.totalInterest - startYear3.totalInterest;
-            const interestLost4Year = startYear3.totalInterest - startYear4.totalInterest;
-            const interestLost5Year = startYear4.totalInterest - startYear5.totalInterest;
-
-            const interestLost5YearsTotal = interestLost1Year + interestLost2Year + interestLost3Year + interestLost4Year + interestLost5Year;
-
-            resultMessage.textContent = `The interest lost by waiting to start saving 1 year is $${Math.round(interestLost1Year).toLocaleString()}.`;
-            interestLost1Span.textContent = Math.round(interestLost1Year).toLocaleString();
-            interestLost5Span.textContent = Math.round(interestLost5YearsTotal).toLocaleString();
-
-            window.currentResults = {
-                age,
-                income,
-                interestLost1Year,
-                interestLost5Years: interestLost5YearsTotal,
-                annualContributions: startNow.annualContributions,
-                annualInterest: startNow.annualInterest,
-                finalBalance: startNow.finalBalance,
-                labels
-            };
+            return;
+        } else {
+            delayImpact.style.display = "block";
         }
 
-        function downloadPDF() {
-            const results = window.currentResults || {};
-            const chartImage = chartCanvas.toDataURL('image/png');
+        const startNow = calculateSavings(age, income, rateOfReturn, endAge, savingsRate);
+        const startYear1 = calculateSavings(age + 1, income, rateOfReturn, endAge, savingsRate);
+        const startYear2 = calculateSavings(age + 2, income, rateOfReturn, endAge, savingsRate);
+        const startYear3 = calculateSavings(age + 3, income, rateOfReturn, endAge, savingsRate);
+        const startYear4 = calculateSavings(age + 4, income, rateOfReturn, endAge, savingsRate);
+        const startYear5 = calculateSavings(Math.min(age + 5, 66), income, rateOfReturn, endAge, savingsRate);
 
-            const element = document.createElement('div');
-            element.className = 'pdf-content';
-            element.innerHTML = `
-                <h1 class="pdf-header">Savings Delay Impact Analysis</h1>
-                <div class="pdf-section">
-                    <h2>Your Inputs</h2>
-                    <p><strong>Age:</strong> ${results.age || 0}</p>
-                    <p><strong>Annual Income:</strong> $${results.income?.toLocaleString() || 0}</p>
-                </div>
-                <div class="pdf-section">
-                    <h2>Your Results</h2>
-                    <p><strong>Interest Lost (1 Year Delay):</strong> $${results.interestLost1Year?.toLocaleString(undefined, {maximumFractionDigits: 0}) || 0}</p>
-                    <p><strong>Interest Lost (5 Year Delay):</strong> $${results.interestLost5Years?.toLocaleString(undefined, {maximumFractionDigits: 0}) || 0}</p>
-                    <p><strong>Total Savings by Age 67 (Start Now):</strong> $${results.finalBalance?.toLocaleString(undefined, {maximumFractionDigits: 0}) || 0}</p>
-                </div>
-                <div class="pdf-section pdf-chart">
-                    <h2>Annual Savings Growth (Starting Now)</h2>
-                    <img src="${chartImage}" style="max-width: 100%; height: auto;" alt="Savings Chart">
-                </div>
-                <div class="pdf-section">
-                    <h2>Assumptions</h2>
-                    <p><strong>Rate of Return:</strong> 6%</p>
-                    <p><strong>Timeline End Age:</strong> 67</p>
-                    <p><strong>Savings Amount:</strong> 20% of income</p>
-                </div>
-                <p class="pdf-disclaimer">The suggested recommendations serve as general guidelines but may differ based on your unique financial circumstances.  Contact a financial representative for a more personalized assessment.</p>
-            `;
+        const years = endAge - age;
+        const labels = Array.from({ length: years + 1 }, (_, i) => age + i);
 
-            const opt = {
-                margin: [0.5, 0.5, 0.5, 0.5],
-                filename: 'Savings_Delay_Results.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
+        // Create color arrays for both datasets
+        const contribColors = Array(years).fill('#3498db').concat('#e74c3c'); // Last bar red
+        const interestColors = Array(years).fill('#2ecc71').concat('#e74c3c'); // Last bar red
 
-            html2pdf().set(opt).from(element).save();
-        }
+        savingsChart.data.labels = labels;
+        savingsChart.data.datasets[0].data = startNow.annualContributions.map(c => Math.round(c));
+        savingsChart.data.datasets[0].backgroundColor = contribColors;
+        savingsChart.data.datasets[1].data = startNow.annualInterest.map(i => Math.round(i));
+        savingsChart.data.datasets[1].backgroundColor = interestColors;
+        savingsChart.update();
 
-        [ageInput, incomeInput].forEach(input => {
-            input.addEventListener('input', updateChart);
-        });
+        const interestLost1Year = startNow.totalInterest - startYear1.totalInterest;
+        const interestLost2Year = startYear1.totalInterest - startYear2.totalInterest;
+        const interestLost3Year = startYear2.totalInterest - startYear3.totalInterest;
+        const interestLost4Year = startYear3.totalInterest - startYear4.totalInterest;
+        const interestLost5Year = startYear4.totalInterest - startYear5.totalInterest;
 
-        // Initial update
-        updateChart();
-    </script>
+        const interestLost5YearsTotal = interestLost1Year + interestLost2Year + interestLost3Year + interestLost4Year + interestLost5Year;
+
+        resultMessage.textContent = `The interest lost by waiting to start saving 1 year is $${Math.round(interestLost1Year).toLocaleString()}.`;
+        interestLost1Span.textContent = Math.round(interestLost1Year).toLocaleString();
+        interestLost5Span.textContent = Math.round(interestLost5YearsTotal).toLocaleString();
+
+        window.currentResults = {
+            age,
+            income,
+            interestLost1Year,
+            interestLost5Years: interestLost5YearsTotal,
+            annualContributions: startNow.annualContributions,
+            annualInterest: startNow.annualInterest,
+            finalBalance: startNow.finalBalance,
+            labels
+        };
+    }
+
+    function downloadPDF() {
+        const results = window.currentResults || {};
+        const chartImage = chartCanvas.toDataURL('image/png');
+
+        const element = document.createElement('div');
+        element.className = 'pdf-content';
+        element.innerHTML = `
+            <h1 class="pdf-header">Savings Delay Impact Analysis</h1>
+            <div class="pdf-section">
+                <h2>Your Inputs</h2>
+                <p><strong>Age:</strong> ${results.age || 0}</p>
+                <p><strong>Annual Income:</strong> $${results.income?.toLocaleString() || 0}</p>
+            </div>
+            <div class="pdf-section">
+                <h2>Your Results</h2>
+                <p><strong>Interest Lost (1 Year Delay):</strong> $${results.interestLost1Year?.toLocaleString(undefined, {maximumFractionDigits: 0}) || 0}</p>
+                <p><strong>Interest Lost (5 Year Delay):</strong> $${results.interestLost5Years?.toLocaleString(undefined, {maximumFractionDigits: 0}) || 0}</p>
+                <p><strong>Total Savings by Age 67 (Start Now):</strong> $${results.finalBalance?.toLocaleString(undefined, {maximumFractionDigits: 0}) || 0}</p>
+            </div>
+            <div class="pdf-section pdf-chart">
+                <h2>Annual Savings Growth (Starting Now)</h2>
+                <img src="${chartImage}" style="max-width: 100%; height: auto;" alt="Savings Chart">
+            </div>
+            <div class="pdf-section">
+                <h2>Assumptions</h2>
+                <p><strong>Rate of Return:</strong> 6%</p>
+                <p><strong>Timeline End Age:</strong> 67</p>
+                <p><strong>Savings Amount:</strong> 20% of income</p>
+            </div>
+            <p class="pdf-disclaimer">The suggested recommendations serve as general guidelines but may differ based on your unique financial circumstances.  Contact a financial representative for a more personalized assessment.</p>
+        `;
+
+        const opt = {
+            margin: [0.5, 0.5, 0.5, 0.5],
+            filename: 'Savings_Delay_Results.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(element).save();
+    }
+
+    [ageInput, incomeInput].forEach(input => {
+        input.addEventListener('input', updateChart);
+    });
+
+    updateChart();
+</script>
 </body>
 </html>
