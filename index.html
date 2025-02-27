@@ -431,13 +431,28 @@
             "The Need for Retirement Planning", "How a Roth IRA Works", "IRAs Compared", 
             "How a 401(k) Cash or Deferred Plan Works"
         ],
+        lifeInsurance: [
+            "Term Life Insurance", "The Need for Responsible Planning", "Types of Life Insurance Policies"
+        ],
         estatePlanning: [
-            "Term Life Insurance", "The Need for Responsible Planning", "Types of Life Insurance Policies", 
             "Advantages of a Will", "Avoiding Probate", "Basic Steps in the Estate Planning Process", 
             "The Importance of Beneficiary Designations", "Types of Wills and Trusts", 
             "The Need for Estate Planning"
+        ],
+        general: [
+            "Accumulation Goals", "Basic Steps in the Financial Planning Process", 
+            "Choose the Financial Planning Team"
         ]
     };
+
+    // Combine all reports into a single array for random selection
+    const allRelatedReports = [
+        ...relatedTopicsReports.disability,
+        ...relatedTopicsReports.retirement,
+        ...relatedTopicsReports.lifeInsurance,
+        ...relatedTopicsReports.estatePlanning,
+        ...relatedTopicsReports.general
+    ];
 
     function getRandomItems(array, count) {
         const shuffled = array.slice().sort(() => 0.5 - Math.random());
@@ -450,11 +465,8 @@
     }
 
     function updateRelatedTopics() {
-        const disabilityReport = getRandomItems(relatedTopicsReports.disability, 1)[0];
-        const retirementReport = getRandomItems(relatedTopicsReports.retirement, 1)[0];
-        const estatePlanningReport = getRandomItems(relatedTopicsReports.estatePlanning, 1)[0];
-        const selectedReports = [disabilityReport, retirementReport, estatePlanningReport];
-        relatedTopicsList.innerHTML = selectedReports.map(report => `<p>${report}</p>`).join('');
+        const randomReports = getRandomItems(allRelatedReports, 3);
+        relatedTopicsList.innerHTML = randomReports.map(report => `<p>${report}</p>`).join('');
     }
 
     function calculateSavings(startAge, income, rate, endAge, savingsRate) {
