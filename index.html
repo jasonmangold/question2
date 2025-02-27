@@ -445,15 +445,6 @@
         ]
     };
 
-    // Combine all reports into a single array for random selection
-    const allRelatedReports = [
-        ...relatedTopicsReports.disability,
-        ...relatedTopicsReports.retirement,
-        ...relatedTopicsReports.lifeInsurance,
-        ...relatedTopicsReports.estatePlanning,
-        ...relatedTopicsReports.general
-    ];
-
     function getRandomItems(array, count) {
         const shuffled = array.slice().sort(() => 0.5 - Math.random());
         return shuffled.slice(0, count);
@@ -465,8 +456,15 @@
     }
 
     function updateRelatedTopics() {
-        const randomReports = getRandomItems(allRelatedReports, 3);
-        relatedTopicsList.innerHTML = randomReports.map(report => `<p>${report}</p>`).join('');
+        // Get all category keys
+        const categories = Object.keys(relatedTopicsReports);
+        // Randomly select 3 distinct categories
+        const selectedCategories = getRandomItems(categories, 3);
+        // Pick one random report from each selected category
+        const selectedReports = selectedCategories.map(category => 
+            getRandomItems(relatedTopicsReports[category], 1)[0]
+        );
+        relatedTopicsList.innerHTML = selectedReports.map(report => `<p>${report}</p>`).join('');
     }
 
     function calculateSavings(startAge, income, rate, endAge, savingsRate) {
